@@ -1,77 +1,35 @@
-import { ApolloServer, gql } from "apollo-server";
+import dotenv from "dotenv";
+dotenv.config();
 
-let users = [];
-let posts = [];
+import { ApolloServer } from "apollo-server";
 
- 
- 
+import typeDefs from "./schema/index.js";
+import resolvers from "./resolvers/index.js";
+import { connectDB } from "./config/db.js";
+import { getUser } from "./middlerare/auth.js";
 
-const typeDefs = gql`
+connectDB();
 
-    type User {
-        id: ID!
-        name: String!
-    }
-    
-    type Post {
-        id: ID!
-        title: String!
-        content: String!
-        authorId: ID!
-    }
-
-    type Query {
-     users: [User!]!  
-     posts: [Post!]!
-     user(id: String!): User!
-    }
-
-    type Mutation {
-        createUser(name: String!): User!
-        createPost(title: String!, content: String!, authorId: ID!): Post!
-    }
-`;
-
-const resolvers = {
-  Query: {
-    users: () => {
-      return users;
-    },
-    user:(_,{id}) => {
-        return users.find(user => user.id === id)
-    },
-    posts: () => {
-        return posts
-    }
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  cors: {
+    origin: "*",
   },
+  context: async ({ req }) => {
+    const token = req.headers.authorization || "";
+    const user = await getUser(token);
 
-  Mutation: {
-    createUser: (_, { name }) => {
-      const newUser = {
-        id: String(users.length + 1),
-        name: name,
-      };
-
-      users.push(newUser);
-      return newUser;
-    },
-    createPost: (_, {title, content, authodId}) => {
-        const newPost = {
-            id: String(posts.length + 1),
-            title,
-            content,
-            authodId
-        }
-
-        posts.push(newPost)
-        return newPost
-    }
+    return {
+      user,
+      models: {
+        User: (await import("./models/User.js")).default,
+        Post: (await import("./models/Post.js")).default,
+        Comment: (await import("./models/Comment.js")).default,
+      },
+    };
   },
-};
-
-const server = new ApolloServer({ typeDefs, resolvers, cors: {
-    origin: '*'
-} });
+});
 
 server.listen().then(({ url }) => {
   console.log(`Server ready at ${url}`);

@@ -1,0 +1,32 @@
+blog-graphql/
+│
+├── src/
+│   ├── config/
+│   │   └── db.js
+│   │
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Post.js
+│   │   └── Comment.js
+│   │
+│   ├── schema/
+│   │   ├── user.schema.js
+│   │   ├── post.schema.js
+│   │   ├── comment.schema.js
+│   │   └── index.js
+│   │
+│   ├── resolvers/
+│   │   ├── user.resolver.js
+│   │   ├── post.resolver.js
+│   │   ├── comment.resolver.js
+│   │   └── index.js
+│   │
+│   ├── middleware/
+│   │   └── auth.js
+│   │
+│   ├── utils/
+│   │   └── generateToken.js
+│   │
+│   └── index.js
+│
+└── package.json
